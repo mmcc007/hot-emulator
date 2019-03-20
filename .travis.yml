@@ -1,10 +1,15 @@
 sudo: true
 dist: trusty
-
 jobs:
   include:
-    - stage: build docker image
-      script: build.sh
-    - stage: publish docker image
-      if: tag IS present
-      script: ./publish.sh
+  - stage: build docker image
+    script: "./build.sh"
+  - stage: publish docker image
+    if: tag IS present
+    script:
+    - "./build.sh"
+    - "./publish.sh"
+env:
+  global:
+  - secure: JMPvqZked22pZlFSVAEjg5pThADy3MaYD47RbJe3kE65P4vvn+pOSLMwqoMh4d7IdWYH852S3mJNLOZTTcqGvE425D2pZaU1HdXptkRL+xa1WiZGoBYk7cQ3FEDzemyobUsz2cfj4G5BeVSdliUl8F3M9SIcF0zEuAMQVtIgbb5p18oOy+00CJaEZ347PTXzCm56fvzuiDQGfpLm0e65Qb+1G5RKSdNJATBMkrkmoEF90Q3o30mtOWPl95rwy/Pjr6GwFk7sCR1c3sDLnO0tRdNKu+eZul6TKnAwO/kq0U31SqDXVRCezG9gGPSvVe75d75G8/i4iHtjbuT+IEC7SBwLEDPpucfnVXZRc3lr6oIb+G6b3k/9e/cPfmyy1/qZOj+24OvbY82VTQCHNYngJyRe8KX48C2+5sFK8LFBjUZWV4J0nUif4DlInyf8eRY11ntWS40G0rwsa57TuJOgxKwUnN34MoI70hAnQsW6Sxvl/lo4PscRhVzVKOhkIycuHUKpuligBxyQoNfk43KE2YVbSr38AtEXDqItMU80aP3XqarQu0G159MxTqN9LiBEFGfrILFw3Gsb1XQWOnGhjSTT7LZjYSJ410aC+/ETxdpX9A7+3ivSoFE9HvLZ04ahWWV99E0135Jg/1mPr7Ipdn00LLm77gAXfJamHXAqrb4=
+  - secure: Sc83kLQ3bdT91KNn17LcBQ77Mepe4Jt46JZZbf+3foESIvIX4wafUgnlM05IqUm4d24OAqk4Y41DXx78FpiXSEw+tTKpXFr2Ia367ShlZpCHt3wy8EHJQe8NQQfxOcrOoxZdRvGuEbrVO2R9LV340PtiP3P3UQuMTNk9fbanGPNv/v1lJAInXQHPi3POkYqoIa8v4RHWWXDHvFUNM86PWUnQdCZLkpjkELhWAz6zR18G0htBWW6fmcfh4S+ISpEFUjm8Xbwe7Wch1QSky+k98bdZgGVwzfxVsAoyskvZBH8DRozo7zFcLEtGx+W+llWrFNPEEh5as155OAap4WLkboMn0JDoy6+fA9b46pnm9kmOYrvQtU+4SypPOEEnxsNgTSe0Wbjgz1Qq1mO31jn8Yj5nKfnnNEVtBjHl+kFdthkeeaxsLL8b5YSItqUeFD2wTaUAXCSjOYKyzpe6H9RLxo4MMnKzKi7lcrGev29vmTEd9JzxxeP4TSHX6+3x9Re8qm4GSQqw/+KhJ5zh5mR/Rjo7+MGcszqH7Q1m6SkUEm4ZF5Ue/QsA1AvwpKyGTs0pFpGIFjd2t4cRReQDtTKv+zSbAvb7IrgZgJBE97+WXr9Hv4Ij/p30utLV5GH5G1G8m3I8ldl+A/Neiu/R2JMYLRi8UNlhSitdD/tWvBnGI5s=
