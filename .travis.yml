@@ -1,0 +1,10 @@
+sudo: true
+dist: trusty
+
+jobs:
+  include:
+    - stage: build docker image
+      script: build.sh
+    - stage: publish docker image
+      if: tag IS present
+      script: ./publish.sh
