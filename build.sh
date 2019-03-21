@@ -7,6 +7,7 @@ if [ -z $DOCKER_USERNAME ]; then
   exit 1
 fi
 
+rm -f avd.tar.gz
 wget http://155.94.195.190/avd.tar.gz
 
 docker build --tag $DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG \
