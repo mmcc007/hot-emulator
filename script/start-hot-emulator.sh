@@ -7,4 +7,4 @@ emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
 $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options &
 
 # wait for emulator to start up
-android-wait-for-emulator.sh
+./script/android-wait-for-emulator.sh
