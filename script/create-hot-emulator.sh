@@ -2,6 +2,9 @@
 
 # create avd and quickstart snapshot
 
+# fail on any error
+set -e
+
 show_help() {
   printf "usage: $0 [command]
 
