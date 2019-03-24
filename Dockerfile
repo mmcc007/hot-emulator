@@ -1,4 +1,4 @@
-FROM thyrlian/android-sdk-vnc:latest
+FROM thyrlian/android-sdk-vnc:3.0
 
 LABEL maintainer "mmcc007@gmail.com"
 
