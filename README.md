@@ -4,5 +4,5 @@
 Docker image of android emulator with quickboot snapshot
 
 # Demo
-See example of usage at:
-mmcc007/hot-emulator-demo
+See example of usage at:  
+https://github.com/mmcc007/hot-emulator-demo
