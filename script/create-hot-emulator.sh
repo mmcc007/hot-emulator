@@ -5,96 +5,116 @@
 # fail on any error
 set -e
 
-show_help() {
-  printf "usage: $0 [command]
+show_usage() {
+  printf "usage: $0 <option>
 
 Utility for creating an AVD and a quickstart snapshot
 
-Commands:
-    --avd
-        creates an AVD
+Options:
     --snapshot
         creates quickstart snapshot
     --archive
-        archives avd with quickstart snapshot
+        create tar file of snapshot
+	(run before starting emulator)
+    --start
+        start hot emulator (as a test)
 "
 }
 
-emu_name='test'
+usage_fail() { echo "$@";  show_usage; exit 111; }
 
+# check for required pre-defined vars
+check_predefined_vars(){
+  required_vars=(android_home emu_name android_abi emulator_api emu_options)
+  for name in "${required_vars[@]}"; do 
+    eval var='$'$name
+    [ -z "${var}" ] && { echo "$name not defined"; exit 1; }
+  done
+  return 0
+}
+
+
+# creates a new avd
 create_avd(){
   echo creating avd...
 
-EMULATOR_API_LEVEL=22; ANDROID_ABI="default;armeabi-v7a"
-#EMULATOR_API_LEVEL=25; ANDROID_ABI="google_apis;armeabi-v7a"
-#EMULATOR_API_LEVEL=24; ANDROID_ABI="default;armeabi-v7a"
+  # stop emulator (if running)
+  SERVICE="emulator"
+  if pgrep "$SERVICE" >/dev/null; then
+    adb emu kill
+  fi
 
-# stop emulator (have to wait for emulator to stop)
-#adb emu kill
+  # clear old avd directory
+  rm -rf ~/.android/avd
 
-# restart only or also create new avd?
-  # install images and create new avd
-
-  # setup and launch emulator inside the container
-  # create a new Android Virtual Device
-  #echo "no" | avdmanager create avd -n test -k "system-images;android-25;google_apis;armeabi-v7a"
-  # launch emulator
-  #emulator64-arm -avd test -noaudio -no-boot-anim -accel on -gpu swiftshader_indirect &
-  #emulator -avd test -noaudio -no-boot-anim -accel on -gpu swiftshader_indirect &
-  #emulator64-arm -avd test -noaudio -no-boot-anim -gpu offscreen
-  #emulator -avd test -noaudio -no-boot-anim -gpu swiftshader &
-  
   # Install system image and create avd
-  #sdkmanager "system-images;android-$EMULATOR_API_LEVEL;$ANDROID_ABI" > /dev/null
-  sdkmanager "system-images;android-$EMULATOR_API_LEVEL;$ANDROID_ABI"
+  sdkmanager "system-images;android-$emulator_api;$android_abi"
   sdkmanager --list | head -15
-  echo no | avdmanager create avd --force -n $emu_name -k "system-images;android-$EMULATOR_API_LEVEL;$ANDROID_ABI"
+  echo no | avdmanager create avd --force -n $emu_name -k "system-images;android-$emulator_api;$android_abi"
   # increase avd ram (from 96 MB)
-  echo "hw.ramSize=1024" >> /root/.android/avd/$emu_name.avd/config.ini
+  echo "hw.ramSize=1024" >> $HOME/.android/avd/$emu_name.avd/config.ini
 }
 
 create_snapshot(){
+  create_avd
   echo creating quickstart snapshot...
-
-#emu_options="-no-audio -no-window -gpu swiftshader"
-#emu_options="-no-audio -no-boot-anim -gpu swiftshader"
-#emu_options="-no-audio -no-window -no-boot-anim -gpu off"
-emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
 
   # start emu (if restarting, uses default snapshot)
   $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options &
-#  echo Starting emulator $emu_name with api $EMULATOR_API_LEVEL and ABI ${ANDROID_ABI} in background...
   
   # wait for emulator to start
   ./script/android-wait-for-emulator.sh
 
   # stop emulator to create quickstart snapshot
   adb emu kill
+
+  #archive_avd
 }
 
 archive_avd(){
   echo archiving avd with quickstart snapshot...
   (cd ~/.android; tar czvf avd.tar.gz avd)
+  mv ~/.android/avd.tar.gz .
+
+  # copy archive to web server
+  sudo cp avd.tar.gz /var/www/html
 }
 
-# if no command passed
+# start the hot emulator to confirm it is working
+start_hot_emulator(){
+  # redirect stdin, stdout and stderr to avoid hanging if called from ssh
+  #emulator -avd $emu_name $emu_options > emulator.out 2> emulator.err < /dev/null &
+  #cat emulator.out
+  #cat emulator.err
+  $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options -no-snapshot-save &
+
+  # wait for emulator to start
+  ./script/android-wait-for-emulator.sh
+
+  # stop emulator to create quickstart snapshot
+  adb emu kill
+
+}
+
+source create-hot-emulator.env
+check_predefined_vars
+
+# if no option passed
 if [ -z $1 ]; then
-  echo Error: command required
-  show_help
+  usage_fail Error: option required
 else
   case $1 in
-    --avd)
-	create_avd
-        ;;
     --snapshot)
 	create_snapshot
         ;;
     --archive)
 	archive_avd
         ;;
+    --start)
+	start_hot_emulator
+        ;;
     *)
-        echo Unknown command: $1
-        show_help
+	usage_fail Error: unknown option: $1
         ;;
   esac
 fi
